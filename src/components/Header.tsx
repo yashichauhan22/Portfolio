@@ -86,25 +86,65 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Action Controls */}
         <div className="flex items-center space-x-1.5 sm:space-x-2.5">
-          {/* GitHub Sync Status Button */}
+          {/* GitHub Auth & Sync Status Button */}
           <button
             onClick={onOpenGitHubSettings}
-            title="GitHub Synchronization Configuration"
-            className="flex items-center space-x-1.5 font-mono text-xs text-[#1a1c1b] bg-[#e8e8e6] hover:bg-[#c4c5d9] px-2 sm:px-2.5 py-1.5 transition-colors cursor-pointer border border-[#c4c5d9]/60 min-h-[38px]"
+            title={
+              gitHubConfig?.isConnected
+                ? `Logged in as @${gitHubConfig.user?.login || gitHubConfig.username} (Admin Privileges Active)`
+                : 'Login with GitHub to unlock Add, Edit & Delete capabilities'
+            }
+            className={`flex items-center space-x-1.5 font-mono text-xs px-2.5 sm:px-3 py-1.5 transition-colors cursor-pointer border min-h-[38px] ${
+              gitHubConfig?.isConnected
+                ? 'bg-[#e8e8e6] hover:bg-[#c4c5d9] border-emerald-500/50 text-[#1a1c1b]'
+                : 'bg-amber-50 hover:bg-amber-100 border-amber-300 text-amber-900'
+            }`}
           >
-            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="hidden sm:inline">GitHub</span>
-            <span className="material-symbols-outlined text-[15px] text-[#5e5e5e]">sync_alt</span>
+            {gitHubConfig?.isConnected ? (
+              <>
+                <img
+                  src={gitHubConfig.user?.avatar_url || `https://github.com/${gitHubConfig.username}.png`}
+                  alt={gitHubConfig.username}
+                  className="w-4 h-4 rounded-full border border-emerald-600"
+                />
+                <span className="hidden sm:inline font-bold">
+                  @{gitHubConfig.user?.login || gitHubConfig.username}
+                </span>
+                <span className="hidden lg:inline bg-emerald-100 text-emerald-800 text-[9px] px-1.5 py-0.2 font-bold uppercase tracking-wider">
+                  Admin
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="material-symbols-outlined text-[15px] text-amber-700">lock</span>
+                <span className="font-bold">Login with GitHub</span>
+              </>
+            )}
           </button>
 
           {/* Add Project Action Button */}
           <button
             onClick={onOpenAddProject}
-            title="Add a new project to portfolio & sync to GitHub"
-            className="flex items-center space-x-1.5 font-mono text-xs uppercase tracking-wider text-white bg-[#0040e0] hover:bg-[#001356] px-2.5 sm:px-3 py-1.5 transition-colors cursor-pointer min-h-[38px]"
+            title={
+              gitHubConfig?.isConnected
+                ? 'Add a new project to portfolio & sync to GitHub'
+                : 'GitHub Login required to add projects'
+            }
+            className={`flex items-center space-x-1.5 font-mono text-xs uppercase tracking-wider text-white px-2.5 sm:px-3 py-1.5 transition-colors cursor-pointer min-h-[38px] ${
+              gitHubConfig?.isConnected
+                ? 'bg-[#0040e0] hover:bg-[#001356]'
+                : 'bg-[#121212] hover:bg-[#0040e0]'
+            }`}
           >
-            <span className="material-symbols-outlined text-[16px]">add</span>
+            <span className="material-symbols-outlined text-[16px]">
+              {gitHubConfig?.isConnected ? 'add' : 'add'}
+            </span>
             <span className="hidden sm:inline">Add Project</span>
+            {!gitHubConfig?.isConnected && (
+              <span className="material-symbols-outlined text-[13px] text-amber-300 opacity-90">
+                lock
+              </span>
+            )}
           </button>
 
           {/* Quick CLI Trigger */}
@@ -186,20 +226,36 @@ export const Header: React.FC<HeaderProps> = ({
                   onOpenAddProject();
                   setMobileMenuOpen(false);
                 }}
-                className="bg-[#0040e0] text-white py-3 px-4 flex items-center justify-center space-x-2 text-xs uppercase tracking-widest"
+                className={`text-white py-3 px-4 flex items-center justify-center space-x-2 text-xs uppercase tracking-widest ${
+                  gitHubConfig?.isConnected ? 'bg-[#0040e0]' : 'bg-[#121212]'
+                }`}
               >
-                <span className="material-symbols-outlined text-sm">add</span>
-                <span>+ Add New Project</span>
+                <span className="material-symbols-outlined text-sm">
+                  {gitHubConfig?.isConnected ? 'add' : 'lock'}
+                </span>
+                <span>
+                  {gitHubConfig?.isConnected ? '+ Add New Project' : '+ Add New Project (Requires Login)'}
+                </span>
               </button>
               <button
                 onClick={() => {
                   onOpenGitHubSettings();
                   setMobileMenuOpen(false);
                 }}
-                className="bg-[#e8e8e6] text-[#1a1c1b] py-2.5 px-4 flex items-center justify-center space-x-2 text-xs uppercase tracking-widest border border-[#c4c5d9]"
+                className={`py-2.5 px-4 flex items-center justify-center space-x-2 text-xs uppercase tracking-widest border ${
+                  gitHubConfig?.isConnected
+                    ? 'bg-[#e8e8e6] text-[#1a1c1b] border-emerald-500/40'
+                    : 'bg-amber-50 text-amber-900 border-amber-300'
+                }`}
               >
-                <span className="material-symbols-outlined text-sm">sync</span>
-                <span>Configure GitHub Sync</span>
+                <span className="material-symbols-outlined text-sm">
+                  {gitHubConfig?.isConnected ? 'account_circle' : 'lock'}
+                </span>
+                <span>
+                  {gitHubConfig?.isConnected
+                    ? `@${gitHubConfig.user?.login || gitHubConfig.username} (Admin Settings)`
+                    : 'Login with GitHub'}
+                </span>
               </button>
             </div>
           </div>

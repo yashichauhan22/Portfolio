@@ -7,6 +7,7 @@ import {
   updateGitHubRepoMetadata,
   syncProjectMetaFileToGitHub,
   createGitHubRepo,
+  isGitHubAuthenticated,
 } from '../services/githubService';
 import { getStoredProjects } from '../services/projectStorage';
 import { ProjectContributionsChart } from './ProjectContributionsChart';
@@ -18,6 +19,7 @@ interface ProjectManagerModalProps {
   onSaveProject: (project: Project, syncMessage?: string) => void;
   existingProjectsCount: number;
   allProjects?: Project[];
+  onOpenGitHubLogin?: () => void;
 }
 
 const DEFAULT_IMAGES = [
@@ -38,6 +40,7 @@ export const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({
   onSaveProject,
   existingProjectsCount,
   allProjects,
+  onOpenGitHubLogin,
 }) => {
   const [activeTab, setActiveTab] = useState<'basics' | 'stack' | 'challenge' | 'github' | 'code' | 'activity'>('basics');
   const [ghConfig] = useState<GitHubConfig>(getStoredGitHubConfig());
@@ -282,6 +285,14 @@ async def predict(data: dict):
 
     let syncMessage = '';
 
+    // Verify authentication before saving
+    if (!isGitHubAuthenticated()) {
+      if (onOpenGitHubLogin) {
+        onOpenGitHubLogin();
+      }
+      return;
+    }
+
     // If GitHub sync is enabled and token is present, update real GitHub repo
     const token = githubToken.trim() || ghConfig.token;
     if (syncToGithub && githubRepo.trim() && token) {
@@ -393,6 +404,32 @@ async def predict(data: dict):
 
         {/* Scrollable Form Content */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-5 sm:space-y-6">
+          {/* Security Gate Notice if not authenticated */}
+          {!isGitHubAuthenticated() && (
+            <div className="p-4 bg-amber-50 border-l-4 border-amber-500 text-xs text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center space-x-2.5">
+                <span className="material-symbols-outlined text-amber-700 text-xl shrink-0">lock</span>
+                <div>
+                  <span className="font-bold font-mono uppercase tracking-wider block text-amber-900">
+                    Security Gate: GitHub Login Required
+                  </span>
+                  <span className="text-amber-800">
+                    You must authenticate with GitHub to create, update, or sync portfolio projects.
+                  </span>
+                </div>
+              </div>
+              {onOpenGitHubLogin && (
+                <button
+                  type="button"
+                  onClick={onOpenGitHubLogin}
+                  className="bg-amber-600 hover:bg-amber-700 text-white font-mono text-[11px] uppercase tracking-wider px-3.5 py-2 transition-colors cursor-pointer shrink-0 font-bold"
+                >
+                  Login with GitHub
+                </button>
+              )}
+            </div>
+          )}
+
           {/* TAB 1: Basics */}
           {activeTab === 'basics' && (
             <div className="space-y-5">

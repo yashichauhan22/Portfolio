@@ -1,4 +1,4 @@
-import { GitHubConfig, Project } from '../types';
+import { GitHubConfig, GitHubUser, Project } from '../types';
 
 const GITHUB_CONFIG_STORAGE_KEY = 'portfolio_github_config';
 
@@ -27,14 +27,46 @@ export const saveGitHubConfig = (config: GitHubConfig) => {
   }
 };
 
-export interface GitHubUser {
-  login: string;
-  name: string;
-  avatar_url: string;
-  public_repos: number;
-  html_url: string;
-  bio?: string;
-}
+export const isGitHubAuthenticated = (): boolean => {
+  const cfg = getStoredGitHubConfig();
+  return Boolean(cfg.isConnected && cfg.token && cfg.token.trim().length > 0);
+};
+
+export const getStoredGitHubUser = (): GitHubUser | null => {
+  const cfg = getStoredGitHubConfig();
+  return cfg.user || null;
+};
+
+export const loginWithGitHubToken = async (token: string): Promise<GitHubUser> => {
+  if (!token.trim()) {
+    throw new Error('Please enter a GitHub Personal Access Token.');
+  }
+  const user = await verifyGitHubToken(token.trim());
+  user.authenticatedAt = new Date().toISOString();
+  
+  const currentConfig = getStoredGitHubConfig();
+  const updated: GitHubConfig = {
+    ...currentConfig,
+    token: token.trim(),
+    username: user.login,
+    isConnected: true,
+    user,
+  };
+  saveGitHubConfig(updated);
+  return user;
+};
+
+export const logoutGitHub = (): GitHubConfig => {
+  const updated: GitHubConfig = {
+    token: '',
+    username: 'yashichauhan22',
+    isConnected: false,
+    autoSyncOnSave: false,
+    user: undefined,
+  };
+  saveGitHubConfig(updated);
+  return updated;
+};
 
 export interface GitHubRepoData {
   name: string;

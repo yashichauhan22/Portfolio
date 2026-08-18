@@ -66,8 +66,9 @@ export const InteractiveTerminal: React.FC<InteractiveTerminalProps> = ({
         response = (
           <div className="space-y-1 text-[#dde1ff]">
             <div>AVAILABLE COMMANDS:</div>
+            <div>  <span className="text-white font-bold">login / auth</span>  - Authenticate with GitHub to manage projects</div>
             <div>  <span className="text-white font-bold">projects</span>    - List all AI/ML projects and GitHub sync status</div>
-            <div>  <span className="text-white font-bold">add</span>         - Open project creator modal to add a new project</div>
+            <div>  <span className="text-white font-bold">add</span>         - Create and sync new case study (requires auth)</div>
             <div>  <span className="text-white font-bold">github</span>      - Configure GitHub token & real-time sync</div>
             <div>  <span className="text-white font-bold">case &lt;n&gt;</span>     - Inspect specific case study by number (e.g. case 1)</div>
             <div>  <span className="text-white font-bold">exp</span>         - Display DSCI internship & work experience</div>
@@ -78,6 +79,16 @@ export const InteractiveTerminal: React.FC<InteractiveTerminalProps> = ({
             <div>  <span className="text-white font-bold">exit</span>        - Close terminal shell</div>
           </div>
         );
+        break;
+
+      case 'login':
+      case 'auth':
+      case 'signin':
+        if (onOpenGitHubSettings) {
+          onOpenGitHubSettings();
+          response = <div className="text-emerald-400">Opening GitHub Authentication Gateway...</div>;
+          setTimeout(onClose, 300);
+        }
         break;
 
       case 'add':

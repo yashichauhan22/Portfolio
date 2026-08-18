@@ -44,11 +44,22 @@ export interface Project {
   }[];
 }
 
+export interface GitHubUser {
+  login: string;
+  name: string;
+  avatar_url: string;
+  public_repos: number;
+  html_url: string;
+  bio?: string;
+  authenticatedAt?: string;
+}
+
 export interface GitHubConfig {
   token: string;
   username: string;
   isConnected: boolean;
   autoSyncOnSave: boolean;
+  user?: GitHubUser;
 }
 
 export interface ExperienceItem {
